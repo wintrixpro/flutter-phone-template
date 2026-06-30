@@ -139,11 +139,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       return SizedBox(
                         width: 35,
                         child: TextField(
-                          controller: otpControllers[index],
-                          focusNode: focusNodes[index],
-                          keyboardType: TextInputType.number,
-                          textAlign: Alignment.center,
-                          maxLength: 1,
+  controller: otpControllers[index],
+  focusNode: focusNodes[index],
+  keyboardType: TextInputType.number,
+  textAlign: TextAlign.center, //  यह बिल्कुल सही है
+  maxLength: 1,
+
                           decoration: const InputDecoration(counterText: ""),
                           onChanged: (value) {
                             if (value.isNotEmpty && index < 5) {
