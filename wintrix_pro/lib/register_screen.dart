@@ -142,7 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: otpControllers[index],
                           focusNode: focusNodes[index],
                           keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center, // यहाँ एरर फिक्स कर दिया गया है
+                          textAlign: TextAlign.center,
                           maxLength: 1,
                           decoration: const InputDecoration(counterText: ""),
                           onChanged: (value) {
@@ -285,4 +285,90 @@ class _RegisterScreenState extends State<RegisterScreen> {
             "created_at": ServerValue.timestamp,
           };
           await _dbRef.child("profiles").child(user.uid).set(newProfile);
-          await _saveLoginPrefs(user.uid, user.
+          await _saveLoginPrefs(user.uid, user.displayName ?? "Player", "");
+          _navigateToHome();
+        }
+      }
+    } catch (e) {
+      _setLoading(false, "SIGN UP");
+      _showSnackBar("Google Auth Failed.");
+    }
+  }
+
+  // ────────── Helpers ──────────
+  void _setLoading(bool loading, String text) {
+    setState(() {
+      _isLoading = loading;
+      _btnText = text;
+    });
+  }
+
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _saveLoginPrefs(String uid, String name, String phoneStr) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("userId", uid);
+    await prefs.setString("userName", name);
+    await prefs.setString("phone", phoneStr);
+    await prefs.setBool("isLoggedIn", true);
+  }
+
+  void _navigateToHome() {
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+  }
+
+  void _showBanDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("ACCOUNT SUSPENDED"),
+        content: const Text("Your account has been permanently banned."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("EXIT"))
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Register")),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                TextField(controller: _fnameController, decoration: const InputDecoration(labelText: "First Name")),
+                TextField(controller: _lnameController, decoration: const InputDecoration(labelText: "Last Name")),
+                TextField(controller: _phoneController, decoration: const InputDecoration(labelText: "Phone (10 digits)"), keyboardType: TextInputType.phone),
+                TextField(controller: _passController, decoration: const InputDecoration(labelText: "Password"), obscureText: true),
+                TextField(controller: _cpassController, decoration: const InputDecoration(labelText: "Confirm Password"), obscureText: true),
+                TextField(controller: _referralController, decoration: const InputDecoration(labelText: "Referral Code (Optional)")),
+                Row(
+                  children: [
+                    Checkbox(value: _cbTerms, onChanged: (val) => setState(() => _cbTerms = val ?? false)),
+                    const Expanded(child: Text("I accept the Terms & Conditions")),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _validateAndStartRegistration,
+                  child: Text(_btnText),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _signUpWithGoogle,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                  child: const Text("Sign up with Google"),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+}
