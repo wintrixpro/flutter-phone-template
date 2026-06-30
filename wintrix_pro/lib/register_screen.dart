@@ -139,12 +139,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       return SizedBox(
                         width: 35,
                         child: TextField(
-  controller: otpControllers[index],
-  focusNode: focusNodes[index],
-  keyboardType: TextInputType.number,
-  textAlign: TextAlign.center, //  यह बिल्कुल सही है
-  maxLength: 1,
-
+                          controller: otpControllers[index],
+                          focusNode: focusNodes[index],
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center, // Fixed: Alignment.center to TextAlign.center
+                          maxLength: 1,
                           decoration: const InputDecoration(counterText: ""),
                           onChanged: (value) {
                             if (value.isNotEmpty && index < 5) {
@@ -200,16 +199,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _registerWithPhoneCredential(PhoneAuthCredential phoneCred, String password, String fullName, String phone) async {
     _setLoading(true, "Creating account...");
     try {
-      // क्लीन ईमेल जो बैकएंड के लिए काम आए (डेटाबेस के लिए नहीं)
       final dummyEmail = "${phone.replaceAll("+", "")}@wintrix.app";
       
-      // Create user with email and password
       UserCredential userCred = await _auth.createUserWithEmailAndPassword(
         email: dummyEmail,
         password: password,
       );
 
-      // Link phone credential
       if (userCred.user != null) {
         await userCred.user!.linkWithCredential(phoneCred);
         _saveUserProfile(userCred.user!.uid, fullName, phone, "");
@@ -226,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "id": uid,
       "name": name,
       "phone": phone,
-      "email": email, // अब यहाँ फ़ोन नंबर नहीं, साफ़ ईमेल (या खाली स्ट्रिंग) जाएगा!
+      "email": email, 
       "referred_by": _referralController.text.trim(),
       "is_banned": false,
       "profile_pic": "",
@@ -279,7 +275,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           await _saveLoginPrefs(user.uid, existingName, "");
           _navigateToHome();
         } else {
-          // New Google Profile
           final newProfile = {
             "id": user.uid,
             "name": user.displayName ?? "Player",
